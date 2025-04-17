@@ -1,4 +1,5 @@
-# Job Description and Resume Matching System by Akshara, Dhruv, Harshita
+# Job Description and Resume Matching System 
+#By Akshara, Dhruv, Harshita
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
