@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Matcher</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #007bff 0%, #00b4db 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            padding: 15px 20px;
+        }
+        .form-control {
+            border-radius: 8px;
+            padding: 12px 15px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 25px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .resume-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+        .resume-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .score-badge {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+            border-radius: 20px;
+        }
+        .threshold-line {
+            border-top: 2px dashed #dc3545;
+            margin: 15px 0;
+            opacity: 0.7;
+        }
+        .feedback-icon {
+            font-size: 1.2rem;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="card-header text-center">
+                <h2><i class="fas fa-file-alt mr-2"></i> Resume Matching System</h2>
+                <p class="mb-0">Upload job description and resumes to find the best matches</p>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle mr-2"></i>{{ error }}
+                </div>
+                {% endif %}
+
+                <form method="POST" action="/matcher" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="job_description"><i class="fas fa-clipboard-list mr-2"></i>Job Description:</label>
+                        <textarea class="form-control" id="job_description" name="job_description" rows="6" required placeholder="Paste the job description here..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="resumes"><i class="fas fa-file-upload mr-2"></i>Upload Resumes:</label>
+                        <div class="custom-file">
+                            <input type="file" class="custom-file-input" id="resumes" name="resumes" multiple required accept=".pdf,.docx,.txt">
+                            <label class="custom-file-label" for="resumes">Choose files (PDF, DOCX, TXT)</label>
+                        </div>
+                        <small class="form-text text-muted">For best results, upload at least 5 resumes</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block py-2">
+                        <i class="fas fa-search mr-2"></i>Analyze Resumes
+                    </button>
+                </form>
+
+                {% if results %}
+                <div class="mt-4">
+                    <h4 class="mb-3"><i class="fas fa-chart-bar mr-2"></i>Results Overview</h4>
+                    
+                    <div class="chart-container">
+                        <img src="data:image/png;base64,{{ plot_url }}" alt="Similarity Scores" class="img-fluid">
+                    </div>
+
+                    <div class="threshold-line">
+                        <span class="badge badge-danger">Minimum Threshold (0.5)</span>
+                    </div>
+
+                    <h5 class="mt-4 mb-3"><i class="fas fa-list-ol mr-2"></i>Detailed Analysis</h5>
+                    
+                    {% for result in results %}
+                    <div class="card resume-item mb-3 border-left-{% if result.score >= 0.7 %}success{% elif result.score >= 0.5 %}warning{% else %}danger{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-file-alt mr-2"></i>{{ result.filename }}
+                                </h5>
+                                <span class="badge score-badge 
+                                    {% if result.score >= 0.7 %}badge-success
+                                    {% elif result.score >= 0.5 %}badge-warning
+                                    {% else %}badge-danger{% endif %}">
+                                    Score: {{ result.score }}
+                                </span>
+                            </div>
+                            
+                            <div class="alert alert-{{ result.feedback_class }} mt-2 mb-0">
+                                <div class="d-flex align-items-center">
+                                    <i class="fas 
+                                        {% if result.feedback_class == 'success' %}fa-check-circle 
+                                        {% elif result.feedback_class == 'warning' %}fa-exclamation-circle 
+                                        {% else %}fa-times-circle{% endif %} 
+                                        feedback-icon"></i>
+                                    <span>{{ result.feedback }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Update file input label with selected file names
+        $('#resumes').on('change', function() {
+            var files = $(this)[0].files;
+            var label = $(this).next('.custom-file-label');
+            if (files.length > 1) {
+                label.text(files.length + ' files selected');
+            } else if (files.length === 1) {
+                label.text(files[0].name);
+            }
+        });
+    </script>
+</body>
+</html>
