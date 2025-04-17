@@ -20,7 +20,6 @@ A machine learning-powered system that automatically matches job descriptions wi
 - **User-Friendly Interface**:
   - Clean, responsive Bootstrap UI
   - Simple drag-and-drop file upload
-- **Ranked Results**: Top 5 candidates displayed with matching scores
 
 ## How It Works
 
