@@ -66,7 +66,7 @@
         <div class="card">
             <div class="card-header text-center">
                 <h2><i class="fas fa-file-alt mr-2"></i> Resume Matching System</h2>
-                <p class="mb-0">Upload job description and resumes to find the best matches</p>
+                <p class="mb-0">Upload job description and resume</p>
             </div>
             <div class="card-body">
                 {% if error %}
@@ -86,7 +86,6 @@
                             <input type="file" class="custom-file-input" id="resumes" name="resumes" multiple required accept=".pdf,.docx,.txt">
                             <label class="custom-file-label" for="resumes">Choose files (PDF, DOCX, TXT)</label>
                         </div>
-                        
                     </div>
                     <button type="submit" class="btn btn-primary btn-block py-2">
                         <i class="fas fa-search mr-2"></i>Analyze Resumes
@@ -102,21 +101,21 @@
                     </div>
 
                     <div class="threshold-line">
-                        <span class="badge badge-danger">Minimum Threshold (0.5)</span>
+                        <span class="badge badge-danger">Minimum Threshold (0.3)</span>
                     </div>
 
                     <h5 class="mt-4 mb-3"><i class="fas fa-list-ol mr-2"></i>Detailed Analysis</h5>
                     
                     {% for result in results %}
-                    <div class="card resume-item mb-3 border-left-{% if result.score >= 0.7 %}success{% elif result.score >= 0.5 %}warning{% else %}danger{% endif %}">
+                    <div class="card resume-item mb-3 border-left-{% if result.score >= 0.5 %}success{% elif result.score >= 0.3 %}warning{% else %}danger{% endif %}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <h5 class="mb-0">
                                     <i class="fas fa-file-alt mr-2"></i>{{ result.filename }}
                                 </h5>
                                 <span class="badge score-badge 
-                                    {% if result.score >= 0.7 %}badge-success
-                                    {% elif result.score >= 0.5 %}badge-warning
+                                    {% if result.score >= 0.5 %}badge-success
+                                    {% elif result.score >= 0.3 %}badge-warning
                                     {% else %}badge-danger{% endif %}">
                                     Score: {{ result.score }}
                                 </span>
@@ -145,7 +144,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        // Update file input label with selected file names
         $('#resumes').on('change', function() {
             var files = $(this)[0].files;
             var label = $(this).next('.custom-file-label');
