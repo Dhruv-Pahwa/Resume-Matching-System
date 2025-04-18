@@ -40,21 +40,18 @@ def extract_text(file_path):
 
 def create_plot(resume_names, scores):
     plt.figure(figsize=(12, 6))
-    
-    # Create color mapping based on scores
     colors = []
     for score in scores:
-        if score >= 0.7:
+        if score >= 0.5:
             colors.append('green')
-        elif score >= 0.5:
+        elif score >= 0.3:
             colors.append('orange')
         else:
             colors.append('red')
     
     plt.scatter(resume_names, scores, c=colors, s=100)
-    plt.axhline(y=0.5, color='red', linestyle='--', alpha=0.5)
-    plt.text(len(resume_names)-1, 0.52, 'Minimum Threshold', color='red')
-    
+    plt.axhline(y=0.3, color='red', linestyle='--', alpha=0.5)
+    plt.text(len(resume_names)-1, 0.32, 'Minimum Threshold', color='red')
     plt.xticks(rotation=45, ha='right')
     plt.ylabel('Similarity Score (0-1)')
     plt.title('Resume Matching Scores')
@@ -70,15 +67,12 @@ def create_plot(resume_names, scores):
     return plot_data
 
 def generate_feedback(score):
-    if score >= 0.7:
-        return ("Excellent match! This resume strongly aligns with the job requirements.", 
-                'success')
-    elif score >= 0.5:
-        return ("Moderate match. This resume has some relevant qualifications but may need additional screening.",
-                'warning')
+    if score >= 0.5:
+        return ("Excellent match! This resume strongly aligns with the job requirements.", 'success')
+    elif score >= 0.3:
+        return ("Moderate match. This resume has some relevant qualifications but may need additional screening.", 'warning')
     else:
-        return ("Not suitable for this position. The candidate lacks required qualifications based on this resume.",
-                'danger')
+        return ("Not suitable for this position. The candidate lacks required qualifications based on this resume.", 'danger')
 
 @app.route("/")
 def matchresume():
@@ -91,8 +85,7 @@ def matcher():
         resume_files = request.files.getlist('resumes')
 
         if not resume_files or not job_description:
-            return render_template('matchresume.html', 
-                               error="Please upload resumes and enter a job description.")
+            return render_template('matchresume.html', error="Please upload resumes and enter a job description.")
 
         resumes = []
         valid_files = []
@@ -101,27 +94,21 @@ def matcher():
                 filename = os.path.join(app.config['UPLOAD_FOLDER'], resume_file.filename)
                 resume_file.save(filename)
                 text = extract_text(filename)
-                if text.strip():  # Only add if text extraction worked
+                if text.strip():
                     resumes.append(text)
                     valid_files.append(resume_file.filename)
             except Exception as e:
                 print(f"Error processing {resume_file.filename}: {str(e)}")
 
         if not resumes:
-            return render_template('matchresume.html', 
-                               error="Could not extract text from any resumes. Please try different files.")
+            return render_template('matchresume.html', error="Could not extract text from any resumes. Please try different files.")
 
-        # Vectorize and calculate similarities
         vectorizer = TfidfVectorizer().fit_transform([job_description] + resumes)
         vectors = vectorizer.toarray()
         similarities = cosine_similarity([vectors[0]], vectors[1:])[0]
 
-        # Pair filenames with scores and sort
-        scored_resumes = sorted(zip(valid_files, similarities), 
-                              key=lambda x: x[1], 
-                              reverse=True)
+        scored_resumes = sorted(zip(valid_files, similarities), key=lambda x: x[1], reverse=True)
         
-        # Generate feedback for each
         results = []
         for filename, score in scored_resumes:
             feedback, feedback_class = generate_feedback(score)
@@ -132,12 +119,9 @@ def matcher():
                 'feedback_class': feedback_class
             })
 
-        plot_data = create_plot([r['filename'] for r in results], 
-                              [r['score'] for r in results])
+        plot_data = create_plot([r['filename'] for r in results], [r['score'] for r in results])
 
-        return render_template('matchresume.html', 
-                           results=results,
-                           plot_url=plot_data)
+        return render_template('matchresume.html', results=results, plot_url=plot_data)
 
 if __name__ == '__main__':
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
