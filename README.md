@@ -1,5 +1,4 @@
-# Job Description and Resume Matching System 
-# By Dhruv
+# Job Description and Resume Matching System By Dhruv
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
@@ -16,7 +15,6 @@ A machine learning-powered system that automatically matches job descriptions wi
   - Random Forest classifier for learned pattern recognition
 - **Interactive Visualizations**:
   - Scatter plots of similarity scores
-  - Algorithm comparison charts
 - **User-Friendly Interface**:
   - Clean, responsive Bootstrap UI
   - Simple drag-and-drop file upload
@@ -37,6 +35,3 @@ A machine learning-powered system that automatically matches job descriptions wi
 - **Bootstrap:** Frontend design and layout using Bootstrap for responsive and user-friendly UI.
 - **Machine Learning Libraries:** Libraries such as scikit-learn for implementing machine learning algorithms for text similarity matching.
 - **HTML/CSS:** Frontend markup and styling for web pages.
-
-
-
